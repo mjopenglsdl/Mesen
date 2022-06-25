@@ -14,6 +14,8 @@ private:
 	static GameServerConnection* _netPlayDevices[BaseControlDevice::PortCount];
 
 	list<ControlDeviceState> _inputData;
+	SimpleLock _inputLock;
+
 	string _playerName;
 	int _controllerPort;	
 	string _connectionHash;

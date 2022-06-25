@@ -83,6 +83,8 @@ void GameServerConnection::SendForceDisconnectMessage(string disconnectMessage)
 
 void GameServerConnection::PushState(ControlDeviceState state)
 {
+	auto lock = _inputLock.AcquireSafe();
+
 	if(_inputData.size() == 0 || state != _inputData.back()) {
 		_inputData.clear();
 		_inputData.push_back(state);
@@ -91,8 +93,10 @@ void GameServerConnection::PushState(ControlDeviceState state)
 
 ControlDeviceState GameServerConnection::GetState()
 {
-	size_t inputBufferSize = _inputData.size();
 	ControlDeviceState stateData;
+	auto lock = _inputLock.AcquireSafe();
+	
+	size_t inputBufferSize = _inputData.size();
 	if(inputBufferSize > 0) {
 		stateData = _inputData.front();
 		if(inputBufferSize > 1) {
