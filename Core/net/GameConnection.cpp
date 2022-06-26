@@ -1,15 +1,16 @@
 #include "stdafx.h"
 #include "GameConnection.h"
-#include "HandShakeMessage.h"
-#include "InputDataMessage.h"
-#include "MovieDataMessage.h"
-#include "GameInformationMessage.h"
-#include "SaveStateMessage.h"
-#include "PlayerListMessage.h"
-#include "SelectControllerMessage.h"
+#include "net/messages/HandShakeMessage.h"
+#include "net/messages/InputDataMessage.h"
+#include "net/messages/MovieDataMessage.h"
+#include "net/messages/GameInformationMessage.h"
+#include "net/messages/SaveStateMessage.h"
+#include "net/messages/PlayerListMessage.h"
+#include "net/messages/SelectControllerMessage.h"
 #include "ClientConnectionData.h"
-#include "ForceDisconnectMessage.h"
-#include "ServerInformationMessage.h"
+#include "net/messages/ForceDisconnectMessage.h"
+#include "net/messages/ServerInformationMessage.h"
+#include "net/messages/PingMessage.h"
 
 GameConnection::GameConnection(shared_ptr<Console> console, shared_ptr<Socket> socket)
 {
@@ -21,7 +22,9 @@ void GameConnection::ReadSocket()
 {
 	auto lock = _socketLock.AcquireSafe();
 	int bytesReceived = _socket->Recv((char*)_readBuffer + _readPosition, 0x40000 - _readPosition, 0);
+
 	if(bytesReceived > 0) {
+		// printf("bytesReceived: %d\n", bytesReceived);
 		_readPosition += bytesReceived;
 	}
 }
@@ -51,7 +54,7 @@ NetMessage* GameConnection::ReadMessage()
 {
 	ReadSocket();
 
-	if(_readPosition > 4) {
+	if(_readPosition > 0) {
 		uint32_t messageLength;
 		if(ExtractMessage(_messageBuffer, messageLength)) {
 			switch((MessageType)_messageBuffer[0]) {
@@ -64,6 +67,7 @@ NetMessage* GameConnection::ReadMessage()
 				case MessageType::SelectController: return new SelectControllerMessage(_messageBuffer, messageLength);
 				case MessageType::ForceDisconnect: return new ForceDisconnectMessage(_messageBuffer, messageLength);
 				case MessageType::ServerInformation: return new ServerInformationMessage(_messageBuffer, messageLength);
+				case MessageType::Ping: return new PingMessage(_messageBuffer, messageLength);
 			}
 		}
 	}

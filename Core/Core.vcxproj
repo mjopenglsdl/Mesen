@@ -260,8 +260,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <CallingConvention>Cdecl</CallingConvention>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
@@ -565,6 +564,12 @@
     <ClInclude Include="FlashSST39SF040.h" />
     <ClInclude Include="Gkcx1.h" />
     <ClInclude Include="HdPackConditions.h" />
+    <ClInclude Include="net\GameClient.h" />
+    <ClInclude Include="net\GameClientConnection.h" />
+    <ClInclude Include="net\GameConnection.h" />
+    <ClInclude Include="net\GameServer.h" />
+    <ClInclude Include="net\GameServerConnection.h" />
+    <ClInclude Include="PingMessage.h" />
     <ClInclude Include="HistoryViewer.h" />
     <ClInclude Include="IBarcodeReader.h" />
     <ClInclude Include="IBattery.h" />
@@ -862,12 +867,7 @@
     <ClInclude Include="Disassembler.h" />
     <ClInclude Include="DisassemblyInfo.h" />
     <ClInclude Include="EmulationSettings.h" />
-    <ClInclude Include="GameClient.h" />
-    <ClInclude Include="GameClientConnection.h" />
-    <ClInclude Include="GameConnection.h" />
     <ClInclude Include="GameInformationMessage.h" />
-    <ClInclude Include="GameServer.h" />
-    <ClInclude Include="GameServerConnection.h" />
     <ClInclude Include="GxRom.h" />
     <ClInclude Include="HandShakeMessage.h" />
     <ClInclude Include="HdNesPack.h" />
@@ -1011,6 +1011,11 @@
     <ClCompile Include="LuaScriptingContext.cpp" />
     <ClCompile Include="MovieRecorder.cpp" />
     <ClCompile Include="NESHeader.cpp" />
+    <ClCompile Include="net\GameClient.cpp" />
+    <ClCompile Include="net\GameClientConnection.cpp" />
+    <ClCompile Include="net\GameConnection.cpp" />
+    <ClCompile Include="net\GameServer.cpp" />
+    <ClCompile Include="net\GameServerConnection.cpp" />
     <ClCompile Include="NotificationManager.cpp" />
     <ClCompile Include="NsfLoader.cpp" />
     <ClCompile Include="NsfPpu.cpp" />
@@ -1043,12 +1048,7 @@
     <ClCompile Include="EmulationSettings.cpp" />
     <ClCompile Include="ExpressionEvaluator.cpp" />
     <ClCompile Include="FDS.cpp" />
-    <ClCompile Include="GameClient.cpp" />
-    <ClCompile Include="GameClientConnection.cpp" />
-    <ClCompile Include="GameConnection.cpp" />
     <ClCompile Include="GameDatabase.cpp" />
-    <ClCompile Include="GameServer.cpp" />
-    <ClCompile Include="GameServerConnection.cpp" />
     <ClCompile Include="HdVideoFilter.cpp" />
     <ClCompile Include="iNesLoader.cpp" />
     <ClCompile Include="MesenMovie.cpp" />

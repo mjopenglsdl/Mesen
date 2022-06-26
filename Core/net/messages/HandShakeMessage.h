@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "NetMessage.h"
+#include "net/messages/NetMessage.h"
 #include "EmulationSettings.h"
 #include "../Utilities/sha1.h"
 

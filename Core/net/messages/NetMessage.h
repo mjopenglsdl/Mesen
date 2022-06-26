@@ -121,6 +121,7 @@ public:
 	{
 		StreamState();
 		uint32_t messageLength = (uint32_t)_buffer.size();
+		// printf("send() _type: %d, messageLength: %d\n", _type, messageLength);
 		socket.BufferedSend((char*)&messageLength, sizeof(messageLength));
 		socket.BufferedSend((char*)&_buffer[0], messageLength);
 		socket.SendBuffer();

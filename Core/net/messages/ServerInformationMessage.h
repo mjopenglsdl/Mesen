@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "NetMessage.h"
+#include "net/messages/NetMessage.h"
 
 class ServerInformationMessage : public NetMessage
 {

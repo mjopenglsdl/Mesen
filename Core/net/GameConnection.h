@@ -1,6 +1,5 @@
 #pragma once
-#include "stdafx.h"
-#include "../Utilities/SimpleLock.h"
+#include "../../Utilities/SimpleLock.h"
 
 class Socket;
 class NetMessage;

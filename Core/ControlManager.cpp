@@ -3,7 +3,7 @@
 #include "BaseMapper.h"
 #include "EmulationSettings.h"
 #include "Console.h"
-#include "GameServerConnection.h"
+#include "net/GameServerConnection.h"
 #include "MemoryManager.h"
 #include "IKeyManager.h"
 #include "IInputProvider.h"

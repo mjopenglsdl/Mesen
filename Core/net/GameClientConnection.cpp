@@ -1,10 +1,6 @@
 #include "stdafx.h"
 #include "GameClientConnection.h"
-#include "HandShakeMessage.h"
-#include "InputDataMessage.h"
-#include "MovieDataMessage.h"
-#include "GameInformationMessage.h"
-#include "SaveStateMessage.h"
+
 #include "Console.h"
 #include "EmulationSettings.h"
 #include "ControlManager.h"
@@ -13,11 +9,20 @@
 #include "Zapper.h"
 #include "ArkanoidController.h"
 #include "BandaiHyperShot.h"
-#include "SelectControllerMessage.h"
-#include "PlayerListMessage.h"
-#include "ForceDisconnectMessage.h"
-#include "ServerInformationMessage.h"
 #include "NotificationManager.h"
+
+#include "net/messages/PlayerListMessage.h"
+#include "net/messages/ForceDisconnectMessage.h"
+#include "net/messages/SelectControllerMessage.h"
+#include "net/messages/ServerInformationMessage.h"
+#include "net/messages/InputDataMessage.h"
+#include "net/messages/MovieDataMessage.h"
+#include "net/messages/TurnDataMessage.h"
+#include "net/messages/HandShakeMessage.h"
+#include "net/messages/GameInformationMessage.h"
+#include "net/messages/SaveStateMessage.h"
+#include "net/messages/PingMessage.h"
+
 
 GameClientConnection::GameClientConnection(shared_ptr<Console> console, shared_ptr<Socket> socket, ClientConnectionData &connectionData) : GameConnection(console, socket)
 {
@@ -74,7 +79,7 @@ void GameClientConnection::ClearInputData()
 void GameClientConnection::ProcessMessage(NetMessage* message)
 {
 	GameInformationMessage* gameInfo;
-
+	
 	switch(message->GetType()) {
 		case MessageType::ServerInformation:
 			_serverSalt = ((ServerInformationMessage*)message)->GetHashSalt();
@@ -130,6 +135,20 @@ void GameClientConnection::ProcessMessage(NetMessage* message)
 				_console->GetSettings()->ClearFlags(EmulationFlags::Paused);
 			}
 			_console->Resume();
+			break;
+
+		case MessageType::Ping:
+			{
+				uint32_t ping_id = ((PingMessage*)message)->GetId();
+				if (m_ping_histroy.find(ping_id) != m_ping_histroy.end()) {
+					int ping = static_cast<int>(_timer.GetElapsedMS() - m_ping_histroy[ping_id]);
+					printf("Ping ID: %d, ping: %d \n", ping_id, ping);
+					m_ping_histroy.erase(ping_id);
+				}
+				else {
+					printf("INVALID Ping ID: %d !!! \n", ping_id);
+				}
+			}
 			break;
 		default:
 			break;
@@ -236,6 +255,7 @@ void GameClientConnection::SendInput()
 
 		ControlDeviceState inputState;
 		if(_controlDevice) {
+			// get input from local device
 			_controlDevice->SetStateFromInput();
 			inputState = _controlDevice->GetRawState();
 		}
@@ -247,6 +267,34 @@ void GameClientConnection::SendInput()
 		}
 	}
 }
+
+void GameClientConnection::SendInputTurn() 
+{
+	// 60 FPS, 3 subturn = 1/20s = 50ms for each lockstep frame
+	static constexpr int kSubTurnsPerTurn = 3;
+
+	sub_turn_num_++;
+	if (sub_turn_num_ != kSubTurnsPerTurn) {
+		return;
+	}
+
+	// Turn
+
+}
+
+
+void GameClientConnection::SendPing()
+{
+	static uint32_t ping_id = 1;
+
+	PingMessage msg(ping_id);
+	SendNetMessage(msg);
+
+	m_ping_histroy[ping_id] = static_cast<int>(_timer.GetElapsedMS());
+
+	ping_id++;
+}
+
 
 void GameClientConnection::SelectController(uint8_t port)
 {

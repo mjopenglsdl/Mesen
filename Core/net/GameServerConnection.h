@@ -25,6 +25,8 @@ private:
 	void PushState(ControlDeviceState state);
 	void SendServerInformation();
 	void SendGameInformation();
+	void SendBackPing(int32_t id);
+
 	void SelectControllerPort(uint8_t port);
 
 	void SendForceDisconnectMessage(string disconnectMessage);

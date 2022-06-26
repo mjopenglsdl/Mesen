@@ -2,22 +2,23 @@
 #include <random>
 #include "MessageManager.h"
 #include "GameServerConnection.h"
-#include "HandShakeMessage.h"
-#include "InputDataMessage.h"
-#include "MovieDataMessage.h"
-#include "GameInformationMessage.h"
-#include "SaveStateMessage.h"
+#include "net/messages/HandShakeMessage.h"
+#include "net/messages/InputDataMessage.h"
+#include "net/messages/MovieDataMessage.h"
+#include "net/messages/GameInformationMessage.h"
+#include "net/messages/SaveStateMessage.h"
 #include "Console.h"
 #include "ControlManager.h"
 #include "ClientConnectionData.h"
 #include "EmulationSettings.h"
 #include "StandardController.h"
-#include "SelectControllerMessage.h"
-#include "PlayerListMessage.h"
+#include "net/messages/SelectControllerMessage.h"
+#include "net/messages/PlayerListMessage.h"
 #include "GameServer.h"
-#include "ForceDisconnectMessage.h"
+#include "net/messages/ForceDisconnectMessage.h"
 #include "BaseControlDevice.h"
-#include "ServerInformationMessage.h"
+#include "net/messages/ServerInformationMessage.h"
+#include "net/messages/PingMessage.h"
 
 GameServerConnection* GameServerConnection::_netPlayDevices[BaseControlDevice::PortCount] = { };
 
@@ -81,6 +82,12 @@ void GameServerConnection::SendForceDisconnectMessage(string disconnectMessage)
 	Disconnect();
 }
 
+void GameServerConnection::SendBackPing(int32_t id)
+{
+	PingMessage msg(id);
+	SendNetMessage(msg);
+}
+
 void GameServerConnection::PushState(ControlDeviceState state)
 {
 	auto lock = _inputLock.AcquireSafe();
@@ -95,7 +102,7 @@ ControlDeviceState GameServerConnection::GetState()
 {
 	ControlDeviceState stateData;
 	auto lock = _inputLock.AcquireSafe();
-	
+
 	size_t inputBufferSize = _inputData.size();
 	if(inputBufferSize > 0) {
 		stateData = _inputData.front();
@@ -159,6 +166,10 @@ void GameServerConnection::ProcessMessage(NetMessage* message)
 				return;
 			}
 			SelectControllerPort(((SelectControllerMessage*)message)->GetPortNumber());
+			break;
+
+		case MessageType::Ping:
+			SendBackPing(((PingMessage*)message)->GetId());
 			break;
 
 		default:

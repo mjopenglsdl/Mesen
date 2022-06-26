@@ -7,12 +7,6 @@
     <Filter Include="VideoDecoder">
       <UniqueIdentifier>{de7ff5ea-3ef4-4181-86f6-b00335d15f4b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="NetPlay">
-      <UniqueIdentifier>{00fd928d-e9aa-45ba-84e9-34f1519709e2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="NetPlay\Messages">
-      <UniqueIdentifier>{8455d832-c72b-4ec2-b90d-ac30ad3d3ad8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Nes">
       <UniqueIdentifier>{efa932b2-780a-45f1-b95e-51a0e7be4922}</UniqueIdentifier>
     </Filter>
@@ -116,6 +110,12 @@
     <Filter Include="Nes\MemoryManager">
       <UniqueIdentifier>{13af8497-e820-43f1-9888-85797a29b551}</UniqueIdentifier>
     </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{00fd928d-e9aa-45ba-84e9-34f1519709e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net\messages">
+      <UniqueIdentifier>{8455d832-c72b-4ec2-b90d-ac30ad3d3ad8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IAudioDevice.h">
@@ -146,25 +146,25 @@
       <Filter>Nes\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="NetMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="HandShakeMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="InputDataMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="SaveStateMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="MovieDataMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="GameInformationMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="MessageType.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="INotificationListener.h">
       <Filter>Nes\Interfaces</Filter>
@@ -260,22 +260,7 @@
       <Filter>VideoDecoder</Filter>
     </ClInclude>
     <ClInclude Include="ClientConnectionData.h">
-      <Filter>NetPlay</Filter>
-    </ClInclude>
-    <ClInclude Include="GameClient.h">
-      <Filter>NetPlay</Filter>
-    </ClInclude>
-    <ClInclude Include="GameClientConnection.h">
-      <Filter>NetPlay</Filter>
-    </ClInclude>
-    <ClInclude Include="GameConnection.h">
-      <Filter>NetPlay</Filter>
-    </ClInclude>
-    <ClInclude Include="GameServer.h">
-      <Filter>NetPlay</Filter>
-    </ClInclude>
-    <ClInclude Include="GameServerConnection.h">
-      <Filter>NetPlay</Filter>
+      <Filter>net</Filter>
     </ClInclude>
     <ClInclude Include="Console.h">
       <Filter>Nes</Filter>
@@ -515,13 +500,13 @@
       <Filter>Nes\Input</Filter>
     </ClInclude>
     <ClInclude Include="PlayerListMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="SelectControllerMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="ForceDisconnectMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="StereoPanningFilter.h">
       <Filter>Nes\APU\Filters</Filter>
@@ -1346,7 +1331,7 @@
       <Filter>Misc</Filter>
     </ClInclude>
     <ClInclude Include="ServerInformationMessage.h">
-      <Filter>NetPlay\Messages</Filter>
+      <Filter>net\messages</Filter>
     </ClInclude>
     <ClInclude Include="Bmc8in1.h">
       <Filter>Nes\Mappers\Unif</Filter>
@@ -1502,6 +1487,24 @@
     <ClInclude Include="VbController.h">
       <Filter>Nes\Input\Controllers</Filter>
     </ClInclude>
+    <ClInclude Include="PingMessage.h">
+      <Filter>net\messages</Filter>
+    </ClInclude>
+    <ClInclude Include="net\GameClient.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\GameClientConnection.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\GameConnection.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\GameServer.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\GameServerConnection.h">
+      <Filter>net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1542,21 +1545,6 @@
     </ClCompile>
     <ClCompile Include="NtscFilter.cpp">
       <Filter>VideoDecoder</Filter>
-    </ClCompile>
-    <ClCompile Include="GameClient.cpp">
-      <Filter>NetPlay</Filter>
-    </ClCompile>
-    <ClCompile Include="GameClientConnection.cpp">
-      <Filter>NetPlay</Filter>
-    </ClCompile>
-    <ClCompile Include="GameConnection.cpp">
-      <Filter>NetPlay</Filter>
-    </ClCompile>
-    <ClCompile Include="GameServer.cpp">
-      <Filter>NetPlay</Filter>
-    </ClCompile>
-    <ClCompile Include="GameServerConnection.cpp">
-      <Filter>NetPlay</Filter>
     </ClCompile>
     <ClCompile Include="Console.cpp">
       <Filter>Nes</Filter>
@@ -1803,6 +1791,21 @@
     </ClCompile>
     <ClCompile Include="StudyBoxLoader.cpp">
       <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="net\GameClient.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\GameClientConnection.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\GameConnection.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\GameServer.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\GameServerConnection.cpp">
+      <Filter>net</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

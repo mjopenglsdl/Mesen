@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include <thread>
-using std::thread;
 
 #include "MessageManager.h"
 #include "GameClient.h"
@@ -9,6 +8,7 @@ using std::thread;
 #include "../Utilities/Socket.h"
 #include "ClientConnectionData.h"
 #include "GameClientConnection.h"
+
 
 shared_ptr<GameClient> GameClient::_instance;
 
@@ -35,12 +35,19 @@ bool GameClient::Connected()
 void GameClient::Connect(shared_ptr<Console> console, ClientConnectionData &connectionData)
 {
 	_instance.reset(new GameClient(console));
-	console->GetNotificationManager()->RegisterNotificationListener(_instance);
 	
+	// init: reg loop call
+	_instance->RegIntervalCall(500, [](){
+		auto self = GameClient::_instance;
+		self->_connection->SendPing();
+	});
+
+	console->GetNotificationManager()->RegisterNotificationListener(_instance);
+
 	shared_ptr<GameClient> instance = _instance;
 	if(instance) {
 		instance->PrivateConnect(connectionData);
-		instance->_clientThread.reset(new thread(&GameClient::Exec, instance.get()));
+		instance->_clientThread.reset(new std::thread(&GameClient::Exec, instance.get()));
 	}
 }
 
@@ -74,8 +81,15 @@ void GameClient::Exec()
 	if(_connected) {
 		while(!_stop) {
 			if(!_connection->ConnectionError()) {
+				ProcesIntervalCall();
 				_connection->ProcessMessages();
-				_connection->SendInput();
+
+				/// might not sync				
+				// _connection->SendInput();
+
+				// lockstep sync
+				_connection->SendInputTurn();
+				
 			} else {
 				_connected = false;
 				_connection->Shutdown();
@@ -117,4 +131,23 @@ uint8_t GameClient::GetControllerPort()
 {
 	shared_ptr<GameClientConnection> connection = GetConnection();
 	return connection ? connection->GetControllerPort() : GameConnection::SpectatorPort;
+}
+
+
+void GameClient::RegIntervalCall(int millisecond, std::function<void()> fn)
+{
+	_interval_calls.emplace_back(millisecond, fn);
+}
+
+void GameClient::ProcesIntervalCall()
+{
+	double now = _timer.GetElapsedMS();
+
+	for(auto& one : _interval_calls) {
+		double time_diff = now - one.prev_call_time;
+		if (time_diff >= one.call_interval)	{
+			one.fn();
+			one.prev_call_time = (int)now;
+		}
+	}
 }

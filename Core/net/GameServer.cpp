@@ -7,7 +7,7 @@ using std::thread;
 #include "Console.h"
 #include "ControlManager.h"
 #include "../Utilities/Socket.h"
-#include "PlayerListMessage.h"
+#include "net/messages/PlayerListMessage.h"
 #include "NotificationManager.h"
 
 shared_ptr<GameServer> GameServer::Instance;

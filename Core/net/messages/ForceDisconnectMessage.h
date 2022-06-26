@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "MessageManager.h"
-#include "NetMessage.h"
+#include "net/messages/NetMessage.h"
 #include "Console.h"
 #include "RomLoader.h"
 #include "../Utilities/FolderUtilities.h"
