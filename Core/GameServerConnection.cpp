@@ -19,6 +19,8 @@
 #include "BaseControlDevice.h"
 #include "ServerInformationMessage.h"
 
+#include "PingMessage.h"
+
 GameServerConnection* GameServerConnection::_netPlayDevices[BaseControlDevice::PortCount] = { };
 
 GameServerConnection::GameServerConnection(shared_ptr<Console> console, shared_ptr<Socket> socket, string serverPassword) : GameConnection(console, socket)
@@ -159,6 +161,14 @@ void GameServerConnection::ProcessMessage(NetMessage* message)
 				return;
 			}
 			SelectControllerPort(((SelectControllerMessage*)message)->GetPortNumber());
+			break;
+
+		case MessageType::Ping:
+			{
+				// ping back
+				PingMessage msg;
+				SendNetMessage(msg);
+			}
 			break;
 
 		default:

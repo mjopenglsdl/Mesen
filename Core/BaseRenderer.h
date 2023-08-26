@@ -44,4 +44,6 @@ protected:
 	void ShowFrameCounter(int lineNumber);
 	void ShowGameTimer(int lineNumber);
 	void DrawCounters();
+
+	void ShowPing(int lineNumber);
 };

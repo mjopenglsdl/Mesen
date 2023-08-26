@@ -1,9 +1,11 @@
 #pragma once
 #include "stdafx.h"
+#include <cstdint>
 #include <deque>
 #include "GameConnection.h"
 #include "../Utilities/AutoResetEvent.h"
 #include "../Utilities/SimpleLock.h"
+#include "../Utilities/Timer.h"
 #include "BaseControlDevice.h"
 #include "IInputProvider.h"
 #include "ControlDeviceState.h"
@@ -32,6 +34,9 @@ private:
 	ClientConnectionData _connectionData;
 	string _serverSalt;
 
+	Timer _pingRecvTimer;
+	float _ping {-1.0f};
+
 private:
 	void SendHandshake();
 	void SendControllerSelection(uint8_t port);
@@ -54,6 +59,9 @@ public:
 	bool SetInput(BaseControlDevice *device) override;
 	void InitControlDevice();
 	void SendInput();
+	void SendPing();
+	
+	float GetPing() {return _ping;}
 
 	void SelectController(uint8_t port);
 	uint8_t GetAvailableControllers();

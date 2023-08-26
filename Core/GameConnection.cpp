@@ -10,6 +10,7 @@
 #include "ClientConnectionData.h"
 #include "ForceDisconnectMessage.h"
 #include "ServerInformationMessage.h"
+#include "PingMessage.h"
 
 GameConnection::GameConnection(shared_ptr<Console> console, shared_ptr<Socket> socket)
 {
@@ -64,6 +65,7 @@ NetMessage* GameConnection::ReadMessage()
 				case MessageType::SelectController: return new SelectControllerMessage(_messageBuffer, messageLength);
 				case MessageType::ForceDisconnect: return new ForceDisconnectMessage(_messageBuffer, messageLength);
 				case MessageType::ServerInformation: return new ServerInformationMessage(_messageBuffer, messageLength);
+				case MessageType::Ping: return new PingMessage(_messageBuffer, messageLength);
 			}
 		}
 	}

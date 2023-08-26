@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <cmath>
+#include <cstdlib>
+#include <iomanip>
 #include "BaseRenderer.h"
 #include "Console.h"
 #include "EmulationSettings.h"
@@ -175,6 +177,20 @@ void BaseRenderer::ShowFrameCounter(int lineNumber)
 	DrawString(lagCounter, _screenWidth - 146, yPos, 250, 235, 215);
 }
 
+void BaseRenderer::ShowPing(int lineNumber)
+{
+	float ping = _console->GetPing();
+	if (ping < 0) {
+		return;
+	}
+
+	int yPos = 13 + 24 * lineNumber;
+
+	std::stringstream ss;
+	ss << "ping: "<< std::setprecision(2) << ping;
+	DrawString(ss.str(), _screenWidth - 146, yPos, 250, 235, 215);
+}
+
 void BaseRenderer::DrawCounters()
 {
 	int lineNumber = 0;
@@ -191,6 +207,9 @@ void BaseRenderer::DrawCounters()
 	if(settings->CheckFlag(EmulationFlags::ShowFrameCounter)) {
 		ShowFrameCounter(lineNumber++);
 	}
+
+	// TODO: need cfg
+	ShowPing(lineNumber++);
 }
 
 bool BaseRenderer::IsMessageShown()

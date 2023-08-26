@@ -1,3 +1,4 @@
+#include "GameClient.h"
 #include "stdafx.h"
 #include <random>
 #include <thread>
@@ -565,6 +566,11 @@ RomInfo Console::GetRomInfo()
 uint32_t Console::GetFrameCount()
 {
 	return _ppu ? _ppu->GetFrameCount() : 0;
+}
+
+float Console::GetPing()
+{
+	return GameClient::GetPing();
 }
 
 NesModel Console::GetModel()

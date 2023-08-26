@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <thread>
 #include "INotificationListener.h"
+#include "../Utilities/Timer.h"
 
 using std::thread;
 class Socket;
@@ -20,6 +21,7 @@ private:
 
 	shared_ptr<GameClientConnection> _connection;
 	bool _connected = false;
+	Timer _pingSendTimer;
 
 	static shared_ptr<GameClientConnection> GetConnection();
 
@@ -33,6 +35,8 @@ public:
 	static bool Connected();
 	static void Connect(shared_ptr<Console> console, ClientConnectionData &connectionData);
 	static void Disconnect();
+
+	static float GetPing();
 
 	static void SelectController(uint8_t port);
 	static uint8_t GetControllerPort();

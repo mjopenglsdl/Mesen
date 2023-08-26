@@ -76,6 +76,13 @@ void GameClient::Exec()
 			if(!_connection->ConnectionError()) {
 				_connection->ProcessMessages();
 				_connection->SendInput();
+				
+				// send ping in every 300ms
+				if (_pingSendTimer.GetElapsedMS() > 300) {
+					_connection->SendPing();
+					_pingSendTimer.Reset();
+				}
+
 			} else {
 				_connected = false;
 				_connection->Shutdown();
@@ -117,4 +124,14 @@ uint8_t GameClient::GetControllerPort()
 {
 	shared_ptr<GameClientConnection> connection = GetConnection();
 	return connection ? connection->GetControllerPort() : GameConnection::SpectatorPort;
+}
+
+
+float GameClient::GetPing()
+{
+	if (!_instance) {
+		return -1.0f;
+	}
+
+	return _instance->_connection->GetPing();
 }

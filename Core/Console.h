@@ -204,6 +204,8 @@ public:
 	VirtualFile GetPatchFile();
 	RomInfo GetRomInfo();
 	uint32_t GetFrameCount();
+	float GetPing();
+	
 	NesModel GetModel();
 
 	uint32_t GetLagCounter();

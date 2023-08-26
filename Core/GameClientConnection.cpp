@@ -17,7 +17,10 @@
 #include "PlayerListMessage.h"
 #include "ForceDisconnectMessage.h"
 #include "ServerInformationMessage.h"
+#include "MessageManager.h"
+#include "PingMessage.h"
 #include "NotificationManager.h"
+#include <string>
 
 GameClientConnection::GameClientConnection(shared_ptr<Console> console, shared_ptr<Socket> socket, ClientConnectionData &connectionData) : GameConnection(console, socket)
 {
@@ -131,6 +134,14 @@ void GameClientConnection::ProcessMessage(NetMessage* message)
 			}
 			_console->Resume();
 			break;
+
+		case MessageType::Ping:
+			{
+				_ping = _pingRecvTimer.GetElapsedMS();
+				// MessageManager::Log("PING: " + std::to_string(_ping));
+			}
+		break;
+		
 		default:
 			break;
 	}
@@ -224,6 +235,13 @@ void GameClientConnection::ProcessNotification(ConsoleNotificationType type, voi
 	} else if(type == ConsoleNotificationType::GameLoaded) {
 		_console->GetControlManager()->RegisterInputProvider(this);
 	}
+}
+
+void GameClientConnection::SendPing()
+{
+	_pingRecvTimer.Reset();
+	PingMessage msg;
+	SendNetMessage(msg);
 }
 
 void GameClientConnection::SendInput()
