@@ -10,6 +10,8 @@ using std::thread;
 #include "PlayerListMessage.h"
 #include "NotificationManager.h"
 
+#include <iostream>
+
 shared_ptr<GameServer> GameServer::Instance;
 
 GameServer::GameServer(shared_ptr<Console> console, uint16_t listenPort, string password, string hostPlayerName)
@@ -60,7 +62,7 @@ void GameServer::AcceptConnections()
 			break;
 		}
 	}
-	_listener->Listen(10);
+	// _listener->Listen(10);
 }
 
 void GameServer::UpdateConnections()
@@ -128,6 +130,7 @@ void GameServer::Exec()
 	_listener.reset(new Socket());
 	_listener->Bind(_port);
 	_listener->Listen(10);
+	
 	_stop = false;
 	_initialized = true;
 	MessageManager::DisplayMessage("NetPlay" , "ServerStarted", std::to_string(_port));

@@ -27,9 +27,11 @@ public:
 
 	void Close();
 	bool ConnectionError();
-
-	void Bind(uint16_t port);
+	
 	bool Connect(const char* hostname, uint16_t port);
+
+	// server
+	void Bind(uint16_t port);
 	void Listen(int backlog);
 	shared_ptr<Socket> Accept();
 
@@ -37,4 +39,20 @@ public:
 	void BufferedSend(char *buf, int len);
 	void SendBuffer();
 	int Recv(char *buf, int len, int flags);
+
+
+#ifndef INET6_ADDRSTRLEN
+	#define INET6_ADDRSTRLEN 46
+#endif
+
+	struct AddrInfo
+	{
+		char addr_buff[INET6_ADDRSTRLEN];
+		int family;
+		int socktype;	
+		int protocol;	
+		int addr_len {0};
+	};
+
+	void InitSocket(const AddrInfo &addr_info);
 };

@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include <cstdio>
 #include <cstring>
+#include <string>
 #include <thread>
 #include "Socket.h"
 
@@ -38,6 +40,46 @@ using namespace std;
 
 #define BUFFER_SIZE 200000
 
+
+static bool getAddrInfo(Socket::AddrInfo &info, const char* host, int port)
+{
+	int ret = 0;
+
+    struct addrinfo hints;
+    hints.ai_flags = AI_PASSIVE;        //  Socket address is intended for `bind'
+    hints.ai_family = AF_UNSPEC;        // IPV4 / IPV6 
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_IP;
+
+    struct addrinfo *res;
+    if ( (ret = getaddrinfo(host, std::to_string(port).c_str(), &hints, &res)) != 0) {
+        printf("get addr err: %s\n", gai_strerror(ret));
+        return false;
+    } else {
+        info.family = res->ai_family;
+        info.socktype = res->ai_socktype;
+        info.protocol = res->ai_protocol;
+
+		memcpy(info.addr_buff, res->ai_addr, res->ai_addrlen);
+        info.addr_len = res->ai_addrlen;
+    }
+    freeaddrinfo(res);
+
+    return true;
+}
+
+void Socket::InitSocket(const AddrInfo &addr_info)
+{
+	_socket = socket(addr_info.family, addr_info.socktype, addr_info.protocol);
+	if(_socket == INVALID_SOCKET) {
+		std::cout << "Socket creation failed. err: " << strerror(errno) << std::endl;
+		SetConnectionErrorFlag();
+		return;
+	} 
+	
+	SetSocketOptions();
+}
+
 Socket::Socket()
 {
 	_sendBuffer = new char[BUFFER_SIZE];
@@ -52,14 +94,6 @@ Socket::Socket()
 		}
 		_cleanupWSA = true;
 	#endif
-
-	_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if(_socket == INVALID_SOCKET) {
-		std::cout << "Socket creation failed." << std::endl;
-		SetConnectionErrorFlag();
-	} else {
-		SetSocketOptions();
-	}
 }
 
 Socket::Socket(uintptr_t socket) 
@@ -108,7 +142,13 @@ void Socket::SetSocketOptions()
 
 	//Disable nagle's algorithm to improve latency
 	u_long value = 1;
-	setsockopt(_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&value, sizeof(value));	
+	setsockopt(_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&value, sizeof(value));
+
+	// support ipv4 & ipv6 for windows
+	int ipv6only = 0;
+	if (setsockopt(_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&ipv6only, sizeof(ipv6only)) != 0) {
+		cout << "set ipv6only failed!";
+	}
 }
 
 void Socket::SetConnectionErrorFlag()
@@ -129,44 +169,32 @@ bool Socket::ConnectionError()
 	return _connectionError;
 }
 
-void Socket::Bind(uint16_t port)
-{
-	SOCKADDR_IN serverInf;
-	serverInf.sin_family = AF_INET;
-	serverInf.sin_addr.s_addr = INADDR_ANY;
-	serverInf.sin_port = htons(port);
-
-	if(UPnPPortMapper::AddNATPortMapping(port, port, IPProtocol::TCP)) {
-		_UPnPPort = port;
-	}
-
-	if(::bind(_socket, (SOCKADDR*)(&serverInf), sizeof(serverInf)) == SOCKET_ERROR) {
-		std::cout << "Unable to bind socket." << std::endl;
-		SetConnectionErrorFlag();
-	}
-}
-
 bool Socket::Connect(const char* hostname, uint16_t port)
 {
-	// Resolve IP address for hostname
 	bool result = false;
-	addrinfo hint;
-	memset((void*)&hint, 0, sizeof(hint));
-	hint.ai_family = AF_INET;
-	hint.ai_protocol = IPPROTO_TCP;
-	hint.ai_socktype = SOCK_STREAM;
-	addrinfo *addrInfo;
+	printf("connect to hostname: %s, port: %d\n", hostname, port);
 
-	if(getaddrinfo(hostname, std::to_string(port).c_str(), &hint, &addrInfo) != 0) {
+	// Resolve IP address for hostname
+	AddrInfo addr_info;
+	if(!getAddrInfo(addr_info, hostname, port)) {
 		std::cout << "Failed to resolve hostname." << std::endl;
 		SetConnectionErrorFlag();
+		return false;
+
 	} else {
+		InitSocket(addr_info);
+
+		// if (-1 == (_socket = socket(addr_info.family, addr_info.socktype, addr_info.protocol))) {
+		// 	printf("create socket err: %s\n", strerror(errno));
+		// 	return false;
+		// }
+
 		//Set socket in non-blocking mode
 		u_long iMode = 1;
 		ioctlsocket(_socket, FIONBIO, &iMode);
 
 		// Attempt to connect to server
-		connect(_socket, addrInfo->ai_addr, (int)addrInfo->ai_addrlen);
+		connect(_socket, (const struct sockaddr *)addr_info.addr_buff, (socklen_t)addr_info.addr_len);
 
 		fd_set writeSockets;
 		#ifdef _WIN32
@@ -175,7 +203,7 @@ bool Socket::Connect(const char* hostname, uint16_t port)
 		#else		
 			FD_ZERO(&writeSockets);
     		FD_SET(_socket, &writeSockets);
-		#endif		
+		#endif
 
 		//Timeout after 3 seconds
 		TIMEVAL timeout;
@@ -194,17 +222,39 @@ bool Socket::Connect(const char* hostname, uint16_t port)
 			}
 			SetConnectionErrorFlag();
 		}
-		
-		freeaddrinfo(addrInfo);
+	}
+	return result;
+}
+
+
+void Socket::Bind(uint16_t port)
+{
+	AddrInfo addr_info;
+	
+	// ipv6 + ipv4
+	if (!getAddrInfo(addr_info, "::0", port)) {
+		std::cout << "[Bind] failed to get addr." << std::endl;
+		SetConnectionErrorFlag();
+		return;
+	}
+	
+	InitSocket(addr_info);
+
+	if(UPnPPortMapper::AddNATPortMapping(port, port, IPProtocol::TCP)) {
+		_UPnPPort = port;
 	}
 
-	return result;
+	// bind
+	if(::bind(_socket, (SOCKADDR*)(&addr_info.addr_buff), addr_info.addr_len) == SOCKET_ERROR) {
+		std::cout << "Unable to bind socket. err: "<<strerror(errno) << std::endl;
+		SetConnectionErrorFlag();
+	}
 }
 
 void Socket::Listen(int backlog)
 {
 	if(listen(_socket, backlog) == SOCKET_ERROR) {
-		std::cout << "listen failed." << std::endl;
+		std::cout << "listen failed. err: " << strerror(errno)<< std::endl;
 		SetConnectionErrorFlag();
 	}
 }
